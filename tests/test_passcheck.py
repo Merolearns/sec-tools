@@ -6,7 +6,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from passcheck import (charset_size, crack_estimates, entropy_bits,
+from passcheck import (charset_size, crack_estimates, deleet, entropy_bits,
                        human_time, load_common_passwords, score_password)
 
 
@@ -61,6 +61,28 @@ def test_variety_suggestion():
     common = load_common_passwords()
     result = score_password("alllowercaseletters", common)
     assert any("variety" in i for i in result["issues"])
+
+
+def test_deleet_normalizes_leetspeak():
+    assert deleet("5up3rm4n") == "superman"
+    assert deleet("P455W0RD") == "password"
+    assert deleet("plain") == "plain"
+
+
+def test_leetspeak_variant_of_common_password_detected():
+    common = load_common_passwords()
+    assert "superman" in common
+    assert "5up3rm4n" not in common  # catches it only via normalization
+    result = score_password("5up3rm4n", common)
+    assert result["score"] <= 10
+    assert any("leetspeak" in i for i in result["issues"])
+
+
+def test_random_password_not_flagged_as_leetspeak():
+    common = load_common_passwords()
+    result = score_password("xQ9#mZ2!vLp4@wT", common)
+    assert not any("leetspeak" in i for i in result["issues"])
+    assert result["label"] == "strong"
 
 
 def test_human_time_units():

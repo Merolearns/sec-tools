@@ -27,6 +27,20 @@ def load_common_passwords():
         return set()  # list missing: skip the check, don't crash
 
 
+# common leetspeak substitutions, so "superman" catches "5up3rm4n"
+LEETSPEAK = {
+    "0": "o", "1": "l", "3": "e", "4": "a", "5": "s",
+    "6": "g", "7": "t", "8": "b", "@": "a", "$": "s",
+    "!": "i", "+": "t", "|": "l",
+}
+
+
+def deleet(password):
+    """Undo common leetspeak substitutions. Not exact — 'p@ssw0rd'
+    normalizes to 'password', which is close enough for this check."""
+    return "".join(LEETSPEAK.get(c, c) for c in password.lower())
+
+
 def charset_size(password):
     size = 0
     if any(c.islower() for c in password):
@@ -77,9 +91,14 @@ def score_password(password, common):
                 "suggestions": ["use a password manager and generate one"]}
 
     lowered = password.lower()
-    if lowered in common:
-        issues.append("this is one of the most commonly used passwords — "
-                      "attackers try it first")
+    leeted = lowered != deleet(password)
+    if lowered in common or deleet(password) in common:
+        if leeted and lowered not in common:
+            issues.append("looks like a leetspeak variant of a commonly used "
+                          "password — attackers normalize for this too")
+        else:
+            issues.append("this is one of the most commonly used passwords — "
+                          "attackers try it first")
         suggestions.append("pick something that isn't on every leaked list")
 
     length = len(password)
@@ -128,7 +147,7 @@ def score_password(password, common):
     score += min(length, 20) * 2.5            # up to 50 for length
     score += variety * 7.5                    # up to 30 for variety
     score += min(entropy / 128 * 20, 20)      # up to 20 for entropy
-    if lowered in common:
+    if lowered in common or deleet(password) in common:
         score = min(score, 10)
     score = max(0, min(100, round(score)))
 

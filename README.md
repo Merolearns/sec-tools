@@ -77,7 +77,7 @@ python3 -m pytest tests/ -v
 ## Things I'd improve
 
 - port-scout: send protocol-specific probes (like an HTTP GET) instead of only listening for banners; add UDP support
-- passcheck: check for l33t-speak variants of common passwords, not just exact matches
+- passcheck: check for l33t-speak variants of common passwords — done Oct 2026 (normalizes `@4$013!+|` etc. before checking the list)
 
 ## License
 
