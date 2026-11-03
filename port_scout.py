@@ -117,7 +117,12 @@ def main():
         parser.error("timeout must be between 0 and 30 seconds")
 
     ip = resolve_target(args.target)
-    ports = COMMON_PORTS if args.common else parse_ports(args.ports)
+    # --ports abc used to die with a bare traceback; flag it as a usage
+    # error like the other bad-flag checks above
+    try:
+        ports = COMMON_PORTS if args.common else parse_ports(args.ports)
+    except ValueError as e:
+        parser.error(str(e))
 
     print(f"scanning {args.target} ({ip}) — {len(ports)} ports, "
           f"{args.threads} threads")

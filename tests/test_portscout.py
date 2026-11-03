@@ -7,7 +7,7 @@ import threading
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from port_scout import grab_banner, parse_ports, resolve_target
+from port_scout import grab_banner, main, parse_ports, resolve_target
 
 
 def test_parse_single_port():
@@ -86,3 +86,16 @@ def test_closed_port_reported_closed():
     is_open, banner = grab_banner("127.0.0.1", port, timeout=1.0)
     assert is_open is False
     assert banner == ""
+
+
+def test_bad_ports_flag_is_a_usage_error(monkeypatch, capsys):
+    # --ports abc used to blow up with a bare ValueError traceback;
+    # it should exit like any other bad flag (usage error, code 2)
+    monkeypatch.setattr(sys, "argv", ["port_scout.py", "localhost", "--ports", "abc"])
+    try:
+        main()
+    except SystemExit as e:
+        assert e.code == 2
+        assert "bad port: 'abc'" in capsys.readouterr().err
+        return
+    raise AssertionError("expected SystemExit")
