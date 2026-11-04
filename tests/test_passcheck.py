@@ -91,6 +91,9 @@ def test_human_time_units():
     assert "minute" in human_time(120)
     assert "hour" in human_time(7200)
     assert "centur" in human_time(10**12)
+    # regression: one century used to render as "~1 centurie"
+    assert human_time(100 * 365.25 * 86400) == "~1 century"
+    assert human_time(300 * 365.25 * 86400) == "~3 centuries"
 
 
 def test_crack_estimates_labeled():

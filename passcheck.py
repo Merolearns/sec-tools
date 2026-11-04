@@ -69,14 +69,19 @@ def entropy_bits(password):
 def human_time(seconds):
     if seconds < 1:
         return "instantly"
-    units = [("centuries", 100 * 365.25 * 86400), ("years", 365.25 * 86400),
-             ("days", 86400), ("hours", 3600), ("minutes", 60),
-             ("seconds", 1)]
-    for name, length in units:
+    # (singular, plural, seconds per unit) — "centuries" does not
+    # pluralize by chopping a letter, so keep both forms explicitly
+    units = [("century", "centuries", 100 * 365.25 * 86400),
+             ("year", "years", 365.25 * 86400),
+             ("day", "days", 86400),
+             ("hour", "hours", 3600),
+             ("minute", "minutes", 60),
+             ("second", "seconds", 1)]
+    for singular, plural, length in units:
         if seconds >= length:
             value = seconds / length
-            # pluralize sensibly for 1
-            label = name[:-1] if abs(value - 1) < 0.05 else name
+            # singular for ~1 of the unit
+            label = singular if abs(value - 1) < 0.05 else plural
             return f"~{value:,.0f} {label}"
     return "instantly"
 
