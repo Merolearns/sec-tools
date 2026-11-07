@@ -59,6 +59,13 @@ def parse_ports(spec):
     return sorted(ports)
 
 
+# plain-HTTP ports: if the service stays quiet after connect, send a
+# GET and read the response line instead of reporting an empty banner.
+# TLS ports (443, 8443) are deliberately left out — a plaintext GET
+# there just gets garbage back.
+HTTP_PORTS = {80, 8000, 8008, 8080, 8081, 8888}
+
+
 def grab_banner(ip, port, timeout):
     """Connect and try to read a banner. Returns (is_open, banner)."""
     try:
@@ -70,6 +77,13 @@ def grab_banner(ip, port, timeout):
                 data = sock.recv(1024)
             except (socket.timeout, ConnectionResetError, OSError):
                 data = b""
+            if not data and port in HTTP_PORTS:
+                # quiet HTTP server — ask it something and read the reply
+                try:
+                    sock.sendall(b"GET / HTTP/1.0\r\n\r\n")
+                    data = sock.recv(1024)
+                except (socket.timeout, ConnectionResetError, OSError):
+                    data = b""
             banner = data.decode("utf-8", errors="replace").strip().split("\n")[0]
             return True, banner[:80]
     except (socket.timeout, ConnectionRefusedError, OSError):

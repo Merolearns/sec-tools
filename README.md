@@ -76,7 +76,7 @@ python3 -m pytest tests/ -v
 
 ## Things I'd improve
 
-- port-scout: send protocol-specific probes (like an HTTP GET) instead of only listening for banners; add UDP support
+- port-scout: send protocol-specific probes (like an HTTP GET) instead of only listening for banners — done Nov 2026 (sends `GET /` on quiet plain-HTTP ports; TLS ports left alone); add UDP support
 - passcheck: check for l33t-speak variants of common passwords — done Oct 2026 (normalizes `@4$013!+|` etc. before checking the list)
 
 ## License
