@@ -96,8 +96,21 @@ def score_password(password, common):
                 "suggestions": ["use a password manager and generate one"]}
 
     lowered = password.lower()
-    leeted = lowered != deleet(password)
-    if lowered in common or deleet(password) in common:
+    normalized = deleet(password)
+    leeted = lowered != normalized
+    exact_common = lowered in common or normalized in common
+    # A common password with extras bolted on ("password123!", "dragonfly")
+    # is barely better than the bare word: attackers try those first too.
+    # Only words of 6+ letters count, so short entries like "solo" or
+    # "007" can't false-positive inside an unrelated password. Longest
+    # match wins, so the message names the most specific word found.
+    embedded = None
+    if not exact_common:
+        embedded = max(
+            (word for word in common
+             if len(word) >= 6 and word in normalized),
+            key=len, default=None)
+    if exact_common:
         if leeted and lowered not in common:
             issues.append("looks like a leetspeak variant of a commonly used "
                           "password — attackers normalize for this too")
@@ -105,6 +118,11 @@ def score_password(password, common):
             issues.append("this is one of the most commonly used passwords — "
                           "attackers try it first")
         suggestions.append("pick something that isn't on every leaked list")
+    elif embedded:
+        issues.append(f"contains the commonly used password {embedded!r} — "
+                      "attackers try the bare word plus digits and symbols")
+        suggestions.append("pick something that isn't built on a leaked "
+                           "password")
 
     length = len(password)
     if length < 8:
@@ -152,8 +170,10 @@ def score_password(password, common):
     score += min(length, 20) * 2.5            # up to 50 for length
     score += variety * 7.5                    # up to 30 for variety
     score += min(entropy / 128 * 20, 20)      # up to 20 for entropy
-    if lowered in common or deleet(password) in common:
+    if exact_common:
         score = min(score, 10)
+    elif embedded:
+        score = min(score, 25)
     score = max(0, min(100, round(score)))
 
     if score < 30:
