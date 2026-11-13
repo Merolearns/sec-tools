@@ -135,3 +135,21 @@ def test_crack_estimates_labeled():
     assert len(est) == 2
     # offline GPU should always be faster than throttled online
     assert est["offline (fast hash, one GPU)"] != est["online (throttled login)"]
+
+
+def test_crack_estimates_very_long_password():
+    # a 200-char mixed password used to raise OverflowError: the
+    # keyspace (95**200) doesn't fit in a float
+    est = crack_estimates("Aa1!" * 50)
+    assert len(est) == 2
+    for when in est.values():
+        assert "10^" in when and "centuries" in when
+
+
+def test_human_time_huge_value_uses_powers_of_ten():
+    # a 200-char lowercase password fits in a float but used to render
+    # as a 280-digit count of centuries
+    when = human_time(10.0 ** 300)
+    assert "10^" in when and "centuries" in when
+    # ordinary huge-but-sane values still render as exact counts
+    assert human_time(10**12).endswith("centuries")

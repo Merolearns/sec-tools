@@ -56,6 +56,14 @@ def test_passcheck_empty_password(client):
     assert b"Enter a password first" in resp.data
 
 
+def test_passcheck_very_long_password(client):
+    # a 200-char mixed password used to 500 the page: crack_estimates
+    # raised OverflowError on a keyspace too big for a float
+    resp = client.post("/passcheck", data={"password": "Aa1!" * 50})
+    assert resp.status_code == 200
+    assert b"centuries" in resp.data
+
+
 def test_port_scout_form_loads(client):
     resp = client.get("/port-scout")
     assert resp.status_code == 200
