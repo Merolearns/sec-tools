@@ -80,6 +80,11 @@ def human_time(seconds):
     for singular, plural, length in units:
         if seconds >= length:
             value = seconds / length
+            if value >= 1e15:
+                # beyond a quadrillion of the biggest unit the exact
+                # digits are noise — powers of ten say the same thing
+                exponent = math.log10(value)
+                return f"~10^{exponent:.0f} {plural}"
             # singular for ~1 of the unit
             label = singular if abs(value - 1) < 0.05 else plural
             return f"~{value:,.0f} {label}"
@@ -196,8 +201,20 @@ def crack_estimates(password):
     combos = size ** len(password) if size else 0
     out = {}
     for name, rate in GUESS_RATES.items():
-        # average case: half the keyspace
-        out[name] = human_time(combos / 2 / rate) if combos else "instantly"
+        if not combos:
+            out[name] = "instantly"
+            continue
+        try:
+            # average case: half the keyspace
+            out[name] = human_time(combos / 2 / rate)
+        except OverflowError:
+            # very long password: the keyspace doesn't fit in a float,
+            # so the /passcheck page used to 500 on it. Work in log
+            # space and report the time in powers of ten centuries.
+            log10_centuries = (len(password) * math.log10(size)
+                               - math.log10(2 * rate)
+                               - math.log10(100 * 365.25 * 86400))
+            out[name] = f"~10^{log10_centuries:.0f} centuries"
     return out
 
 
