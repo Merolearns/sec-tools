@@ -4,6 +4,32 @@ Two small defensive security CLI tools I wrote while studying for my cybersecuri
 
 **For learning and authorized testing only.** Don't scan anything you don't own or have permission to test.
 
+## Web UI
+
+Both tools also run in the browser — same code underneath, results as
+designed pages instead of terminal output.
+
+```bash
+pip install -r requirements.txt
+python3 app.py
+```
+
+Then open http://127.0.0.1:5000/ — the home page links to both tools:
+
+- **passcheck** (`/passcheck`): type a password and get its score out of
+  100, entropy, rough brute-force times, and the same issues and
+  suggestions the CLI prints. The password is checked in memory and never
+  stored, logged, or shown back on the page. Entering `password` scores
+  10/100 (weak) and flags it as one of the most commonly used passwords.
+- **port-scout** (`/port-scout`): enter a host and a port list (or the
+  common-ports preset) and get a table of each port's state, best-guess
+  service, and banner, plus an open-port count and elapsed time. The web
+  form caps a scan at 1024 ports so a stray `1-65535` doesn't tie the page
+  up; the CLI has no cap.
+
+The CLIs are unchanged — `python3 passcheck.py` and
+`python3 port_scout.py <target> --common` still work exactly as before.
+
 ## Tools
 
 ### port-scout
