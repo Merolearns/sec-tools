@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}port-scout — sec-tools{% endblock %}
+{% block content %}
+
+<section class="card">
+  <h2 class="section-title">port-scout</h2>
+  <p class="tool-desc">Multithreaded TCP connect scan with banner grabbing.
+    Give it a host and a port list (or the common-ports preset) and it
+    reports each port's state, best-guess service, and any banner the
+    service sends back.</p>
+
+  <div class="alert alert-warn">
+    <strong>For learning and authorized testing only.</strong>
+    Only scan hosts you own or have explicit permission to test.
+  </div>
+
+  {% if error %}
+  <div class="alert alert-error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('port_scout_page') }}">
+    <div class="field">
+      <label for="target">Target host</label>
+      <input type="text" id="target" name="target" value="{{ target }}" autofocus>
+      <p class="field-hint">Hostname or IP, e.g. <code>localhost</code> or
+        <code>scanme.nmap.org</code> (a host set up for practicing scans).</p>
+    </div>
+    <div class="field">
+      <label for="ports">Ports</label>
+      <input type="text" id="ports" name="ports" value="{{ ports_spec }}"
+             placeholder="80, 22,80,443, or 20-100" {% if use_common %}disabled{% endif %}>
+      <p class="field-hint">One port, a range, or a comma-separated list.
+        Disabled while the common-ports preset is on.</p>
+    </div>
+    <div class="field field-inline">
+      <input type="checkbox" id="common" name="common" {% if use_common %}checked{% endif %}
+             onchange="document.getElementById('ports').disabled = this.checked">
+      <label for="common">Scan common ports (29 well-known ports)</label>
+    </div>
+    <div class="field-inline">
+      <div class="field">
+        <label for="threads">Threads</label>
+        <input type="text" id="threads" name="threads" value="{{ threads }}">
+      </div>
+      <div class="field">
+        <label for="timeout">Timeout (seconds)</label>
+        <input type="text" id="timeout" name="timeout" value="{{ timeout }}">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Scan</button>
+    </div>
+  </form>
+</section>
+
+{% if summary %}
+<section class="card">
+  <h2 class="section-title">Results — {{ summary.target }} ({{ summary.ip }})</h2>
+  <div class="stat-grid">
+    <div class="stat-card">
+      <span class="stat-value">{{ summary.scanned }}</span>
+      <span class="stat-label">ports scanned</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ summary.open }}</span>
+      <span class="stat-label">open</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ summary.elapsed }}s</span>
+      <span class="stat-label">elapsed</span>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Port</th><th>State</th><th>Service</th><th>Banner</th></tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td class="amount">{{ row.port }}</td>
+          <td><span class="state state-{{ row.state }}">{{ row.state }}</span></td>
+          <td>{{ row.service }}</td>
+          <td class="mono banner-cell">{{ row.banner or "&mdash;" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="io-hint">Service names are best guesses from a small built-in
+    table of well-known ports. Banners are the first line the service sent
+    back, if any.</p>
+</section>
+{% endif %}
+
+{% endblock %}

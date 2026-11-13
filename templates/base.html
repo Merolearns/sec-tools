@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}sec-tools{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1><a href="{{ url_for('index') }}">sec-tools</a></h1>
+    <p class="subtitle">Two small defensive security tools, in the browser.
+      Everything runs locally — nothing leaves your machine except the
+      connections port-scout makes to the target you give it.</p>
+    <nav>
+      <a href="{{ url_for('index') }}">Home</a>
+      <span class="nav-sep">&middot;</span>
+      <a href="{{ url_for('passcheck_page') }}">passcheck</a>
+      <span class="nav-sep">&middot;</span>
+      <a href="{{ url_for('port_scout_page') }}">port-scout</a>
+    </nav>
+  </header>
+
+  {% block content %}{% endblock %}
+
+  <footer>
+    <p class="muted">sec-tools — for learning and authorized testing only.
+      Only scan hosts you own or have permission to test.</p>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}sec-tools — password checker and port scanner{% endblock %}
+{% block content %}
+
+<div class="tool-grid">
+  <section class="card tool-card">
+    <h2 class="section-title">passcheck</h2>
+    <p class="tool-desc">Password strength analyzer. Scores a password
+      0&ndash;100, estimates its entropy and rough brute-force crack times,
+      and flags common passwords (including leetspeak variants), short
+      length, low variety, and common sequences — all checked locally.</p>
+    <a class="btn btn-primary" href="{{ url_for('passcheck_page') }}">Check a password &rarr;</a>
+    <p class="io-hint">Also on the command line: <code>python3 passcheck.py</code></p>
+  </section>
+
+  <section class="card tool-card">
+    <h2 class="section-title">port-scout</h2>
+    <p class="tool-desc">Multithreaded TCP port scanner with banner
+      grabbing. Give it a host and a port list or the common-ports preset,
+      and it reports each port's state, best-guess service, and any banner
+      the service sends back.</p>
+    <a class="btn btn-primary" href="{{ url_for('port_scout_page') }}">Scan a host &rarr;</a>
+    <p class="io-hint">Also on the command line: <code>python3 port_scout.py &lt;target&gt; --common</code></p>
+  </section>
+</div>
+
+<div class="alert alert-warn">
+  <strong>For learning and authorized testing only.</strong>
+  Only scan hosts you own or have explicit permission to test.
+</div>
+
+{% endblock %}

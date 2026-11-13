@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Page not found — sec-tools{% endblock %}
+{% block content %}
+
+<section class="card">
+  <h2 class="section-title">Page not found</h2>
+  <p class="empty">That page doesn't exist here. The tools live at
+    <a href="{{ url_for('passcheck_page') }}">passcheck</a> and
+    <a href="{{ url_for('port_scout_page') }}">port-scout</a>.</p>
+  <p><a class="btn btn-primary" href="{{ url_for('index') }}">Back home</a></p>
+</section>
+
+{% endblock %}

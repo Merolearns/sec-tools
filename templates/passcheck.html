@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}passcheck — sec-tools{% endblock %}
+{% block content %}
+
+<section class="card">
+  <h2 class="section-title">passcheck</h2>
+  <p class="tool-desc">Scores a password 0&ndash;100, estimates entropy and
+    rough brute-force times, and flags common passwords, short length, and
+    low variety. The password is checked in memory on this machine and is
+    never stored, logged, or sent anywhere.</p>
+
+  {% if error %}
+  <div class="alert alert-error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('passcheck_page') }}" autocomplete="off">
+    <div class="field">
+      <label for="password">Password to check</label>
+      <input type="password" id="password" name="password" autofocus>
+      <p class="field-hint">Use the password field — the value is never shown
+        back on the page.</p>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Check password</button>
+    </div>
+  </form>
+</section>
+
+{% if result %}
+<section class="card">
+  <div class="score-row">
+    <div>
+      <span class="big-score">{{ result.score }}<span class="score-out-of">/100</span></span>
+      <span class="score-label {{ score_class }}">{{ result.label }}</span>
+    </div>
+    <div class="score-meta">
+      <div>Entropy: <strong>~{{ "%.1f"|format(result.entropy) }} bits</strong>
+        <span class="muted">(rough estimate)</span></div>
+    </div>
+  </div>
+  <div class="score-bar"><div class="score-fill {{ score_class }}" style="width: {{ result.score }}%"></div></div>
+
+  <h3 class="sub-title">Estimated brute-force time</h3>
+  <p class="muted small">Rough, and assumes a random password — real attackers
+    use dictionaries and patterns, so treat these as optimistic.</p>
+  <table>
+    <thead>
+      <tr><th>Attacker</th><th>Time</th></tr>
+    </thead>
+    <tbody>
+      {% for name, when in estimates.items() %}
+      <tr><td>{{ name }}</td><td class="amount">{{ when }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if result.issues %}
+  <h3 class="sub-title">Issues</h3>
+  <ul class="checks">
+    {% for issue in result.issues %}
+    <li>{{ issue }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if result.suggestions %}
+  <h3 class="sub-title">Suggestions</h3>
+  <ul class="checks">
+    {% for suggestion in result.suggestions %}
+    <li>{{ suggestion }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+{% endif %}
+
+{% endblock %}
