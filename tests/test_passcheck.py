@@ -51,6 +51,23 @@ def test_short_password_flagged():
     assert any("short" in i for i in result["issues"])
 
 
+def test_short_password_suggests_more_length():
+    # short passwords used to get the issue ("too short") with no
+    # suggestion attached — every other issue class points at a fix
+    common = load_common_passwords()
+    result = score_password("ab12", common)
+    assert any("12 characters" in s for s in result["suggestions"])
+    result = score_password("Ab3#xY9zQw", common)
+    assert any("short side" in i for i in result["issues"])
+    assert any("12 characters" in s for s in result["suggestions"])
+
+
+def test_long_password_gets_no_length_suggestion():
+    common = load_common_passwords()
+    result = score_password("xQ9#mZ2!vLp4@wT", common)
+    assert not any("12 characters" in s for s in result["suggestions"])
+
+
 def test_empty_password():
     result = score_password("", set())
     assert result["score"] == 0

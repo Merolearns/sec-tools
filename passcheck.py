@@ -132,8 +132,12 @@ def score_password(password, common):
     length = len(password)
     if length < 8:
         issues.append(f"too short ({length} chars)")
+        suggestions.append("aim for at least 12 characters — length is the "
+                           "biggest win")
     elif length < 12:
         issues.append("on the short side")
+        suggestions.append("aim for at least 12 characters — length is the "
+                           "biggest win")
 
     variety = sum([
         any(c.islower() for c in password),
