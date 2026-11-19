@@ -135,6 +135,21 @@ def test_port_scout_bad_ports_is_a_plain_error(client):
     assert b"Traceback" not in resp.data
 
 
+def test_port_scout_preset_and_list_is_a_plain_error(client):
+    # a typed list plus the preset used to silently drop the list and
+    # scan the preset (a no-JS form can submit both at once)
+    resp = client.post("/port-scout", data={
+        "target": "localhost",
+        "ports": "8080",
+        "common": "on",
+        "threads": "10",
+        "timeout": "1.0",
+    })
+    assert resp.status_code == 200
+    assert b"common-ports preset" in resp.data
+    assert b"Traceback" not in resp.data
+
+
 def test_unknown_route_is_404(client):
     resp = client.get("/no-such-page")
     assert resp.status_code == 404

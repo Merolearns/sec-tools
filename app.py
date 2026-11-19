@@ -96,15 +96,22 @@ def port_scout_page():
             elif not 0 < timeout <= 30:
                 error = "Timeout must be between 0 and 30 seconds."
         if not error:
-            try:
-                ports = COMMON_PORTS if use_common else parse_ports(ports_spec)
-            except ValueError as exc:
-                error = str(exc)
+            if use_common and ports_spec:
+                # both were submitted (e.g. a no-JS form): say so instead
+                # of silently dropping the typed list for the preset
+                error = ("You gave a port list and the common-ports preset. "
+                         "Untick the preset to scan your own list, or clear "
+                         "the list to scan the preset.")
             else:
-                if len(ports) > MAX_WEB_PORTS:
-                    error = (f"That's {len(ports)} ports — the web UI caps "
-                             f"a scan at {MAX_WEB_PORTS}. Narrow the range "
-                             "or use the CLI for a full sweep.")
+                try:
+                    ports = COMMON_PORTS if use_common else parse_ports(ports_spec)
+                except ValueError as exc:
+                    error = str(exc)
+                else:
+                    if len(ports) > MAX_WEB_PORTS:
+                        error = (f"That's {len(ports)} ports — the web UI caps "
+                                 f"a scan at {MAX_WEB_PORTS}. Narrow the range "
+                                 "or use the CLI for a full sweep.")
         if not error:
             ip, resolve_error = _resolve(target)
             if resolve_error:
